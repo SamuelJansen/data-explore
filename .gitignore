@@ -1,3 +1,33 @@
+#static
+old-package.json
+*google-oatuh-info.json
+*.png
+*.ico
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+package-lock.json
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -5,6 +35,9 @@ __pycache__/
 
 # C extensions
 *.so
+
+
+
 
 # Distribution / packaging
 .Python
