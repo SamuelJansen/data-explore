@@ -11,9 +11,6 @@ export const AuthenticationComponent = () => {
                 authenticationService.state.loginData ? (
                     <LoggedUserDataComponent></LoggedUserDataComponent>
                 ) : (
-                    <GoogleLoginComponent></GoogleLoginComponent>,
-                    <GoogleLoginComponent></GoogleLoginComponent>,
-                    <GoogleLoginComponent></GoogleLoginComponent>,
                     <GoogleLoginComponent></GoogleLoginComponent>
                 )
             }

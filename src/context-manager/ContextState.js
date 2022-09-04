@@ -26,17 +26,15 @@ class ContexState {
         this.propagateState()
     }
 
-    addStateUpdateHandlerIfNeeded = (stateUpdateHandler) => {
-        if (!!!this.stateUpdateHandler) {
-            this.stateUpdateHandler = stateUpdateHandler
-        }
+    overrideUpdateHandler = (stateUpdateHandler) => {
+        this.stateUpdateHandler = stateUpdateHandler
     }
 }
 
 
 const useContextState = (provider) => {
     const [provided, setProvided] = useState(provider)
-    provided.addStateUpdateHandlerIfNeeded(setProvided)
+    provided.overrideUpdateHandler(setProvided)
     return [
         provided
     ]

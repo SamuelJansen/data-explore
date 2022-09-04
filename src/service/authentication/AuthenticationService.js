@@ -34,8 +34,7 @@ class AuthenticationService extends ContexState {
                 client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
                 callback: (res) => this._handleLogin(res),
             });
-            await window.google.accounts.id.prompt((notification) => {
-                console.log(notification)
+            window.google.accounts.id.prompt((notification) => {
                 if (notification.isNotDisplayed()) {
                     throw new Error('Try to clear the cookies or try again later!');
                 }
@@ -43,7 +42,7 @@ class AuthenticationService extends ContexState {
                     notification.isSkippedMoment() ||
                     notification.isDismissedMoment()
                 ) {
-                    throw new Error('Login dismissed by the client!');
+                    // console.log('logged or dismissed');
                 }
             });
         } catch (error) {
