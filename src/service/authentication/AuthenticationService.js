@@ -1,10 +1,15 @@
-import { ContexState } from '../../context-manager/ContextState';
-import { StorageUtil } from '../../util/local-storage/StorageUtil';
-import { STORAGE_KEYS } from '../../util/local-storage/SotrageKeys';
-import jwtDecode from 'jwt-decode';
+import { ContexState } from "../../context-manager/ContextState";
+import { StorageUtil } from "../../util/local-storage/StorageUtil";
+import { STORAGE_KEYS } from "../../util/local-storage/SotrageKeys";
+import jwtDecode from "jwt-decode";
 
 
-const AUTHORIZATION_HEADER_KEY = 'Authorization'
+const AUTHORIZATION_HEADER_KEY = `Authorization`
+const SCHEMA = `https`
+const BASE_HOST = `data-explore.com`
+const SITE_HOST = `${SCHEMA}://studies.${BASE_HOST}`
+const API_HOST = `${SCHEMA}://api.${BASE_HOST}`
+const API_BASE_URL = `${SCHEMA}://api.${BASE_HOST}/authentication-manager-api`
 
 class AuthenticationService extends ContexState {
 
@@ -52,13 +57,13 @@ class AuthenticationService extends ContexState {
             });
             window.google.accounts.id.prompt((notification) => {
                 if (notification.isNotDisplayed()) {
-                    throw new Error('Try to clear the cookies or try again later!');
+                    throw new Error(`Try to clear the cookies or try again later!`);
                 }
                 if (
                     notification.isSkippedMoment() ||
                     notification.isDismissedMoment()
                 ) {
-                    // console.log('logged or dismissed');
+                    // console.log(`logged or dismissed`);
                 }
             });
         } catch (error) {
@@ -71,42 +76,42 @@ class AuthenticationService extends ContexState {
     }
 
     handleFailure = async (result) => {
-        console.log('Failure at login');
+        console.log(`Failure at login`);
         console.log(result);
         alert(result);
     };
 
     _handleLogin = async (googleData) => {
-        const handleLoginResponse = await fetch('http://localhost:7889/auth', {
-            method: 'POST',
+        const handleLoginResponse = await fetch(`${API_BASE_URL}/auth`, {
+            method: `POST`,
             body: JSON.stringify({
                 token: googleData.credential,
             }),
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': 'https://studies.data-explore.com | * | http://localhost:7888',
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Expose-Headers': '*',
-                'Referrer-Policy': '*',
+                "Accept": `application/json`,
+                "Content-Type": `application/json`,
+                "Access-Control-Allow-Origin": `${API_HOST} | ${SITE_HOST} | * | http://localhost:7888`,
+                "Access-Control-Allow-Headers": `*`,
+                "Access-Control-Expose-Headers": `*`,
+                "Referrer-Policy": `*`,
                 "Access-Control-Allow-Methods": "*",
                 "Access-Control-Allow-Credentials": "true"
             },
         })
-        this.setAuthorization(handleLoginResponse.headers.get(AUTHORIZATION_HEADER_KEY).split(' ')[1]);
+        this.setAuthorization(handleLoginResponse.headers.get(AUTHORIZATION_HEADER_KEY).split(` `)[1]);
         this.setAuthentication(await handleLoginResponse.json());
     }
     
     _handleLogout = async () => {
-        const res = await fetch('http://localhost:7889/auth', {
-            method: 'DELETE',
+        const res = await fetch(`${API_BASE_URL}/auth`, {
+            method: `DELETE`,
             body: JSON.stringify({
                 [AUTHORIZATION_HEADER_KEY]: `Bearer ${this.getAuthorization()}`,
             }),
             headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Sec-Fetch-Dest': 'http://localhost:7889'
+                "Content-Type": `application/json`,
+                "Access-Control-Allow-Origin": `*`,
+                "Sec-Fetch-Dest": `${API_BASE_URL}`
             },
         });
         this.getAuthorization(null);

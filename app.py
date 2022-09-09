@@ -12,6 +12,7 @@ from python_helper import FileHelper, StringHelper, Constant, EnvironmentHelper,
 # KEY_IN_BASE_64 = KEY_IN_BASE_64_BYTES.decode(ASC_II_ENCODING)
 # print(KEY_IN_BASE_64)
 
+BASE_URL = '/authentication-manager-api'
 SETTINGS = SettingHelper.getSettingTree('settings.yml')
 GOOGLE_OAUTH_FILE_NAME = SETTINGS.get('google-ouuth-settings-file-name')
 GOOGLE_OAUTH_PEM = StringHelper.join(
@@ -29,14 +30,14 @@ app = Flask(__name__)
 cors = CORS(
     app,
     resources={
-        f'/auth':{
+        f'{BASE_URL}/*':{
             'origins': '*'
         }
     },
     supports_credentials=True
 )
 
-@app.route('/auth', methods=['POST'])
+@app.route(f'{BASE_URL}/auth', methods=['POST'])
 def login():
     encoded = request.get_json().get('token')
     decoded = jwt.decode(
@@ -69,7 +70,7 @@ def login():
     )
     return resp
 
-@app.route('/auth', methods=['DELETE'])
+@app.route(f'{BASE_URL}/auth', methods=['DELETE'])
 def logout():
     resp = Response(
         json.dumps({
@@ -86,7 +87,7 @@ def logout():
     # resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
-@app.route('/health', methods=['GET'])
+@app.route(f'{BASE_URL}/health', methods=['GET'])
 def health():
     resp = Response(
         json.dumps({
