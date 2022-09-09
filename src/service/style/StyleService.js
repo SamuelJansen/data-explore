@@ -3,8 +3,8 @@ import { StorageUtil } from '../../util/local-storage/StorageUtil';
 import { STORAGE_KEYS } from '../../util/local-storage/SotrageKeys';
 
 
-const DARK_MODE = `darkMode`
-const LIGHT_MODE = `lightMode`
+const DARK_MODE = `dark`
+const LIGHT_MODE = `light`
 
 class StyleService extends ContexState {
 
@@ -16,48 +16,47 @@ class StyleService extends ContexState {
                 height: `100%`,
                 display: `flex`
             },
-            color: {
-                mode: StorageUtil.get(STORAGE_KEYS.COLOR_MODE, DARK_MODE),
-                dark: {
-                    component: {
-                        headLine: `#111111`,
-                        base: `#191919`
-                    },
-                    text: `#FFFFFF`
+            colorMode: StorageUtil.get(STORAGE_KEYS.COLOR_MODE, DARK_MODE),
+            darkColorMode: {
+                component: {
+                    headLine: `#111111`,
+                    base: `#191919`
                 },
-                light: {
-                    component: {
-                        headLine: `#CCCCCC`,
-                        base: `#EFF1EE`
-                    },
-                    text: `#000000`
-                }
+                text: `#FFFFFF`
+            },
+            lightColorMode: {
+                component: {
+                    headLine: `#CCCCCC`,
+                    base: `#EFF1EE`
+                },
+                text: `#000000`
             }
         }
     }
 
     setColorMode = (nextMode) => {
         StorageUtil.set(STORAGE_KEYS.COLOR_MODE, nextMode)
+        this.setState({...this.state, ...{colorMode: nextMode}})
     }
 
     getColorMode = () => {
-        return this.isDarkMode() ? {...this.state.color.dark} : {...this.state.color.light}
+        const currentColorMode = this.isDarkMode() ? {...this.state.darkColorMode} : {...this.state.lightColorMode}
+        return currentColorMode
     }
 
     reloadColorMode = () => {
-        const nextMode = StorageUtil.get(STORAGE_KEYS.COLOR_MODE, DARK_MODE)
-        this.setColorMode(nextMode)
-        return nextMode
+        const nextColorMode = StorageUtil.get(STORAGE_KEYS.COLOR_MODE, DARK_MODE)
+        this.setColorMode(nextColorMode)
+        return nextColorMode
     }
 
     isDarkMode = () => {
-        return DARK_MODE === this.state.color.mode
+        return DARK_MODE === this.state.colorMode
     }
 
     switchMode = () => {
-        const nextMode = this.isDarkMode() ? LIGHT_MODE : DARK_MODE
-        StorageUtil.set(STORAGE_KEYS.COLOR_MODE, nextMode)
-        this.setState({color: {mode: nextMode}})
+        const nextColorMode = this.isDarkMode() ? LIGHT_MODE : DARK_MODE
+        this.setColorMode(nextColorMode)
     }
 
     build = (style, props={default:true}) => {

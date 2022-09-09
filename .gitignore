@@ -1,6 +1,7 @@
 #static
 old-package.json
-*google-oatuh-info.json
+*google-oatuh-info.*
+settings.yml
 *.png
 *.ico
 

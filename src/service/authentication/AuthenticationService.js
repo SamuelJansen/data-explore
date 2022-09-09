@@ -72,7 +72,8 @@ class AuthenticationService extends ContexState {
             }),
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
+                'Access-Control-Allow-Origin': '*',
+                'Sec-Fetch-Dest': 'http://localhost:7889'
             },
         });
         this.setAuthentication(await res.json());
