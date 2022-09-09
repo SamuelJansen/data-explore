@@ -4,12 +4,15 @@ import { STORAGE_KEYS } from '../../util/local-storage/SotrageKeys';
 import jwtDecode from 'jwt-decode';
 
 
+const AUTHORIZATION_HEADER_KEY = 'Authorization'
+
 class AuthenticationService extends ContexState {
 
     constructor() {
         super()
         this.state = {
-            loginData: StorageUtil.get(STORAGE_KEYS.LOGIN_DATA_KEY, null)
+            loginData: StorageUtil.get(STORAGE_KEYS.LOGIN_DATA_KEY, null),
+            authorization: StorageUtil.get(STORAGE_KEYS.AUTHORIZATION_DATA_KEY, null)
         }
     }
 
@@ -26,6 +29,15 @@ class AuthenticationService extends ContexState {
         return this.loginData
     }
     
+    setAuthorization = (authorization) => {
+        !!authorization ? this.setState({authorization: {...authorization}}) : this.setState({authorization: null})
+        StorageUtil.set(STORAGE_KEYS.AUTHORIZATION_DATA_KEY, authorization)
+    }
+    
+    getAuthorization = () => {
+        return this.authorization
+    }
+
     reloadAuthentication = () => {
         const loginData = StorageUtil.get(STORAGE_KEYS.LOGIN_DATA_KEY, null)
         this.set({loginData: loginData})
@@ -65,10 +77,31 @@ class AuthenticationService extends ContexState {
     };
 
     _handleLogin = async (googleData) => {
-        const res = await fetch('http://localhost:7889/auth', {
+        const handleLoginResponse = await fetch('http://localhost:7889/auth', {
             method: 'POST',
             body: JSON.stringify({
                 token: googleData.credential,
+            }),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': 'https://studies.data-explore.com | * | http://localhost:7888',
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Expose-Headers': '*',
+                'Referrer-Policy': '*',
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Credentials": "true"
+            },
+        })
+        this.setAuthorization(handleLoginResponse.headers.get(AUTHORIZATION_HEADER_KEY).split(' ')[1]);
+        this.setAuthentication(await handleLoginResponse.json());
+    }
+    
+    _handleLogout = async () => {
+        const res = await fetch('http://localhost:7889/auth', {
+            method: 'DELETE',
+            body: JSON.stringify({
+                [AUTHORIZATION_HEADER_KEY]: `Bearer ${this.getAuthorization()}`,
             }),
             headers: {
                 'Content-Type': 'application/json',
@@ -76,10 +109,7 @@ class AuthenticationService extends ContexState {
                 'Sec-Fetch-Dest': 'http://localhost:7889'
             },
         });
-        this.setAuthentication(await res.json());
-    }
-    
-    _handleLogout = async () => {
+        this.getAuthorization(null);
         this.setAuthentication(null);
     };
     

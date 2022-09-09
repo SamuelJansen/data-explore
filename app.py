@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import jwt, base64, json
 
@@ -26,45 +26,68 @@ GOOGLE_OAUTH_JSON = json.loads(
 )
 
 app = Flask(__name__)
-cors = CORS(app, resource={
-    r'/*':{
-        'origins': SETTINGS.get('allowed-origins')
-    }
-})
+cors = CORS(
+    app,
+    resources={
+        f'/auth':{
+            'origins': '*'
+        }
+    },
+    supports_credentials=True
+)
 
 @app.route('/auth', methods=['POST'])
 def login():
+    encoded = request.get_json().get('token')
     decoded = jwt.decode(
-        f'''{request.get_json().get('token')}''', 
+        f'{encoded}', 
         key = GOOGLE_OAUTH_PEM,
         algorithms = SETTINGS.get('google-oauth-algorithms'),
         audience = [GOOGLE_OAUTH_JSON.get('web').get('client_id')]
     )
-    return jsonify({
-        'name': decoded.get('name'),
-        'firstName': decoded.get('given_name'),
-        'lastName': decoded.get('family_name'),
-        'email': decoded.get('email'),
-        'picture': decoded.get('picture'),
-        'status': 'SUCCESS'
-    }), 201
+    resp = Response(
+        json.dumps({
+            'name': decoded.get('name'),
+            'firstName': decoded.get('given_name'),
+            'lastName': decoded.get('family_name'),
+            'email': decoded.get('email'),
+            'picture': decoded.get('picture'),
+            'status': 'SUCCESS'
+        }),
+        headers={
+            'Authorization': f'Bearer {encoded}', 
+            'my-header': 'some-value', 
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Expose-Headers': '*',
+            'Referrer-Policy': '*',
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Credentials": "true"
+        },  
+        mimetype='application/json', 
+        status=201
+    )
+    # resp.headers['Authorization'] = f'Bearer {encoded}'
+    # resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 @app.route('/auth', methods=['DELETE'])
 def logout():
-    decoded = jwt.decode(
-        f'''{request.get_json().get('token')}''', 
-        key = GOOGLE_OAUTH_PEM,
-        algorithms = SETTINGS.get('google-oauth-algorithms'),
-        audience = [GOOGLE_OAUTH_JSON.get('web').get('client_id')]
+    resp = Response(
+        json.dumps({
+            'status': 'SUCCESS'
+        }),
+        headers={
+            'Authorization': None, 
+            'Access-Control-Allow-Origin': '*'
+        },  
+        mimetype='application/json',
+        status=204
     )
-    return jsonify({
-        'name': decoded.get('name'),
-        'firstName': decoded.get('given_name'),
-        'lastName': decoded.get('family_name'),
-        'email': decoded.get('email'),
-        'picture': decoded.get('picture'),
-        'status': 'SUCCESS'
-    }), 204
+    # resp.headers['Authorization'] = None
+    # resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
 
 if __name__ == '__main__':
     app.run(port=7889)
