@@ -110,4 +110,4 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(port=7889)
+    app.run(port=7889, host='0.0.0.0')
