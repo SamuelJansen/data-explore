@@ -1,0 +1,4 @@
+export const STORAGE_KEYS = {
+    LOGIN_DATA_KEY: 'LOGIN_DATA',
+    COLOR_MODE: 'COLOR_MODE'
+}

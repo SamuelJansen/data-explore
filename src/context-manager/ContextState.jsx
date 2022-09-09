@@ -12,11 +12,12 @@ class ContexState {
     }
 
     setState = (props) => { 
+        console.log(props)
         if (!!props) {
             Object.keys(props).forEach((key, index) => {
                 if (!!props[key]) {
-                    if (this.state[key] != props[key]) {
-                        this.state[key] = {...props[key]}
+                    if (this.state[key] !== props[key]) {
+                        this.state[key] = props[key]
                     }
                 } else {
                     this.state[key] = null

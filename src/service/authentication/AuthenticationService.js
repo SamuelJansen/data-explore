@@ -1,6 +1,6 @@
 import { ContexState } from '../../context-manager/ContextState';
-import { LocalStorageUtil } from '../../util/local-storage/LocalStorageUtil';
-import { LOCAL_STORAGE_KEYS } from '../../util/local-storage/LocalSotrageKeys';
+import { StorageUtil } from '../../util/local-storage/StorageUtil';
+import { STORAGE_KEYS } from '../../util/local-storage/SotrageKeys';
 import jwtDecode from 'jwt-decode';
 
 
@@ -9,7 +9,7 @@ class AuthenticationService extends ContexState {
     constructor() {
         super()
         this.state = {
-            loginData: LocalStorageUtil.get(LOCAL_STORAGE_KEYS.LOGIN_DATA_KEY)
+            loginData: StorageUtil.get(STORAGE_KEYS.LOGIN_DATA_KEY, null)
         }
     }
 
@@ -19,12 +19,16 @@ class AuthenticationService extends ContexState {
     
     setAuthentication = (loginData) => {
         this.setLoginData(loginData)
-        LocalStorageUtil.set(LOCAL_STORAGE_KEYS.LOGIN_DATA_KEY, loginData)
+        StorageUtil.set(STORAGE_KEYS.LOGIN_DATA_KEY, loginData)
     }
     
     getAuthentication = () => {
-        const loginData = LocalStorageUtil.get(LOCAL_STORAGE_KEYS.LOGIN_DATA_KEY)
-        this.setAuthentication(loginData)
+        return this.loginData
+    }
+    
+    reloadAuthentication = () => {
+        const loginData = StorageUtil.get(STORAGE_KEYS.LOGIN_DATA_KEY, null)
+        this.set({loginData: loginData})
         return loginData
     }
 
