@@ -67,8 +67,6 @@ def login():
         mimetype='application/json', 
         status=201
     )
-    # resp.headers['Authorization'] = f'Bearer {encoded}'
-    # resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
 @app.route('/auth', methods=['DELETE'])
@@ -86,6 +84,27 @@ def logout():
     )
     # resp.headers['Authorization'] = None
     # resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
+@app.route('/health', methods=['GET'])
+def health():
+    resp = Response(
+        json.dumps({
+            'status': 'SUCCESS'
+        }),
+        headers={
+            'Authorization': None, 
+            'my-header': 'some-value', 
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Expose-Headers': '*',
+            'Referrer-Policy': '*',
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Credentials": "true"
+        },  
+        mimetype='application/json', 
+        status=200
+    )
     return resp
 
 
