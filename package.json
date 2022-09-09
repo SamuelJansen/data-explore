@@ -42,7 +42,12 @@
   },
   "devServer": {
     "disableHostCheck": true,
-    "host": "studies.data-explore.com",
-    "port": 7889
+    "compress": true,
+    "inline": true,
+    "port": 7889,
+    "host": "0.0.0.0",
+    "allowedHosts": [
+      ".data-explore.com"
+    ]
   }
 }
