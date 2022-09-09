@@ -25,6 +25,10 @@ GOOGLE_OAUTH_JSON = json.loads(
         character = Constant.BLANK
     )
 )
+print(SETTINGS)
+print(GOOGLE_OAUTH_FILE_NAME)
+print(GOOGLE_OAUTH_PEM)
+print(GOOGLE_OAUTH_JSON)
 
 app = Flask(__name__)
 cors = CORS(

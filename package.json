@@ -16,7 +16,7 @@
     "react-scripts": "^5.0.1"
   },
   "scripts": {
-    "dev": "PORT=7888 react-scripts start",
+    "dev": "PORT=7888 react-scripts start .dev",
     "local": "set PORT=7888 && react-scripts start .local",
     "build": "react-scripts build",
     "test": "react-scripts test",
