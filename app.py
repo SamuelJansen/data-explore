@@ -15,12 +15,12 @@ from python_helper import FileHelper, StringHelper, Constant, EnvironmentHelper,
 SETTINGS = SettingHelper.getSettingTree('settings.yml')
 GOOGLE_OAUTH_FILE_NAME = SETTINGS.get('google-ouuth-settings-file-name')
 GOOGLE_OAUTH_PEM = StringHelper.join(
-    FileHelper.getFileLines(f'{Constant.DOT}{EnvironmentHelper.OS_SEPARATOR}{GOOGLE_OAUTH_FILE_NAME}.pem'), 
+    FileHelper.getFileLines(f'{GOOGLE_OAUTH_FILE_NAME}.pem'), 
     character = Constant.BLANK
 )
 GOOGLE_OAUTH_JSON = json.loads(
     StringHelper.join(
-        FileHelper.getFileLines(f'{Constant.DOT}{EnvironmentHelper.OS_SEPARATOR}{GOOGLE_OAUTH_FILE_NAME}.json'), 
+        FileHelper.getFileLines(f'{GOOGLE_OAUTH_FILE_NAME}.json'), 
         character = Constant.BLANK
     )
 )
