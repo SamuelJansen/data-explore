@@ -1,6 +1,6 @@
 {
   "name": "data-explore",
-  "proxy": "http://0.0.0.0:7889",
+  "proxy": "https://studies.data-explore.com",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -44,7 +44,7 @@
     "disableHostCheck": true,
     "compress": true,
     "inline": true,
-    "port": 7889,
+    "port": 7888,
     "host": "0.0.0.0",
     "allowedHosts": [
       ".data-explore.com"
