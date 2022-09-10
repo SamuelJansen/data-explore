@@ -51,8 +51,6 @@ class AuthenticationService extends ContexState {
     }
 
     doLogin = async () => {
-        console.log(EnvironmnentUtil.isLocal())
-        console.log(EnvironmnentUtil.getCurrentEnvironment())
         try {
             await window.google.accounts.id.initialize({
                 client_id: EnvironmnentUtil.get(ENVIRONEMNT_KEYS.GOOGLE_AUTHENTICATION_CLIENT_ID),
@@ -85,7 +83,6 @@ class AuthenticationService extends ContexState {
     };
 
     _handleLogin = async (googleData) => {
-        console.log(API_BASE_URL)
         const handleLoginResponse = await fetch(`${API_BASE_URL}/auth`, {
             method: `POST`,
             body: JSON.stringify({

@@ -11,8 +11,7 @@ class ContexState {
         this.stateUpdateHandler({...this})
     }
 
-    setState = (props) => { 
-        console.log(props)
+    setState = (props) => {
         if (!!props) {
             Object.keys(props).forEach((key, index) => {
                 if (!!props[key]) {
