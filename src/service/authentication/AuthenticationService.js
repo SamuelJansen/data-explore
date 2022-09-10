@@ -8,10 +8,9 @@ import jwtDecode from "jwt-decode";
 
 const AUTHORIZATION_HEADER_KEY = `Authorization`
 const SCHEMA = EnvironmnentUtil.isLocal() ? `http` : `https`
-const BASE_HOST = EnvironmnentUtil.isLocal() ? `localhost:7889` : `data-explore.com` 
-const SITE_HOST = `${SCHEMA}://studies.${BASE_HOST}`
-const API_HOST = `${SCHEMA}://api.${BASE_HOST}`
-const API_BASE_URL = `${SCHEMA}://api.${BASE_HOST}/authentication-manager-api`
+const SITE_HOST = EnvironmnentUtil.isLocal() ? `localhost:7888` : `studies.data-explore.com` 
+const API_HOST = EnvironmnentUtil.isLocal() ? `localhost:7889` : `api.data-explore.com` 
+const API_BASE_URL = `${SCHEMA}://${API_HOST}/authentication-manager-api`
 
 class AuthenticationService extends ContexState {
 
@@ -86,6 +85,7 @@ class AuthenticationService extends ContexState {
     };
 
     _handleLogin = async (googleData) => {
+        console.log(API_BASE_URL)
         const handleLoginResponse = await fetch(`${API_BASE_URL}/auth`, {
             method: `POST`,
             body: JSON.stringify({
@@ -94,7 +94,7 @@ class AuthenticationService extends ContexState {
             headers: {
                 "Accept": `application/json`,
                 "Content-Type": `application/json`,
-                "Access-Control-Allow-Origin": `${API_HOST} | ${SITE_HOST} | * | http://localhost:7888`,
+                "Access-Control-Allow-Origin": `${API_HOST} | ${SITE_HOST} | * `,
                 "Access-Control-Allow-Headers": `*`,
                 "Access-Control-Expose-Headers": `*`,
                 "Referrer-Policy": `*`,
