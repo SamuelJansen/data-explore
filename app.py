@@ -10,7 +10,6 @@ SETTINGS = SettingHelper.getSettingTree('settings.yml')
 API_BASE_URL = SettingHelper.getSetting('api.server.base-url', SETTINGS)
 API_PORT = SettingHelper.getSetting('api.server.port', SETTINGS)
 GOOGLE_OAUTH_AUDIENCE = [SettingHelper.getSetting('google.oauth.client.id', SETTINGS)]
-print(GOOGLE_OAUTH_AUDIENCE)
 ALLOWED_ORIGINS = SettingHelper.getSetting('allowed-origins' , SETTINGS)
 
 
@@ -47,7 +46,6 @@ cors = CORS(
 @app.route(f'{API_BASE_URL}/auth', methods=['POST'])
 def login():
     encoded = request.get_json().get('token')
-    print(encoded)
     decoded = decodeAndValidateJWK(encoded, audience=GOOGLE_OAUTH_AUDIENCE)
     resp = Response(
         json.dumps({
