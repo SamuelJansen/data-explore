@@ -15,7 +15,7 @@ export const TopbarComponent = () => {
         >
             <div 
                 style={styleService.build({
-                    margin: `0 40px`,
+                    margin: `0 20px`,
                     alignItems: `center`,
                     justifyContent: `space-between`
                 })}
@@ -23,7 +23,7 @@ export const TopbarComponent = () => {
                 <div 
                     className='topbar-left'
                     style={styleService.build({
-                        width: `20%`,
+                        width: `40%`,
                         height: `100%`,
                         display: `flex`,
                         flexDirection: `row`,
