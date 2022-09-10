@@ -1,55 +1,54 @@
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import jwt, base64, json
+import urllib.request
 
-from python_helper import FileHelper, StringHelper, Constant, EnvironmentHelper, SettingHelper
+from python_helper import SettingHelper
 
 
-# ASC_II_ENCODING = 'ascii'
-# KEY = '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'
-# KEY_IN_BYTES = KEY.encode(ASC_II_ENCODING)
-# KEY_IN_BASE_64_BYTES = base64.b64encode(KEY_IN_BYTES)
-# KEY_IN_BASE_64 = KEY_IN_BASE_64_BYTES.decode(ASC_II_ENCODING)
-# print(KEY_IN_BASE_64)
-
-BASE_URL = '/authentication-manager-api'
 SETTINGS = SettingHelper.getSettingTree('settings.yml')
-GOOGLE_OAUTH_FILE_NAME = SETTINGS.get('google-ouuth-settings-file-name')
-GOOGLE_OAUTH_PEM = StringHelper.join(
-    FileHelper.getFileLines(f'{GOOGLE_OAUTH_FILE_NAME}.pem'), 
-    character = Constant.BLANK
-)
-GOOGLE_OAUTH_JSON = json.loads(
-    StringHelper.join(
-        FileHelper.getFileLines(f'{GOOGLE_OAUTH_FILE_NAME}.json'), 
-        character = Constant.BLANK
-    )
-)
-print(SETTINGS)
-print(GOOGLE_OAUTH_FILE_NAME)
-print(GOOGLE_OAUTH_PEM)
-print(GOOGLE_OAUTH_JSON)
+API_BASE_URL = SettingHelper.getSetting('api.server.base-url', SETTINGS)
+API_PORT = SettingHelper.getSetting('api.server.port', SETTINGS)
+GOOGLE_OAUTH_AUDIENCE = [SettingHelper.getSetting('google.oauth.client.id', SETTINGS)]
+print(GOOGLE_OAUTH_AUDIENCE)
+ALLOWED_ORIGINS = SettingHelper.getSetting('allowed-origins' , SETTINGS)
+
+
+def getJWKsUrl(issuer_url):
+    well_known_url = issuer_url + "/.well-known/openid-configuration"
+    with urllib.request.urlopen(well_known_url) as response:
+        well_known = json.load(response)
+    if not 'jwks_uri' in well_known:
+        raise Exception('jwks_uri not found in OpenID configuration')
+    return well_known['jwks_uri']
+
+
+def decodeAndValidateJWK(token, audience=None):
+    unvalidated = jwt.decode(token, options={"verify_signature": False}, audience=audience)
+    jwks_url = getJWKsUrl(unvalidated['iss'])
+    jwks_client = jwt.PyJWKClient(jwks_url)
+    header = jwt.get_unverified_header(token)
+    key = jwks_client.get_signing_key(header["kid"]).key
+    return jwt.decode(token, key=key, algorithms=[header["alg"]], audience=audience)
+
 
 app = Flask(__name__)
 cors = CORS(
     app,
     resources={
-        f'{BASE_URL}/*':{
+        f'{API_BASE_URL}/*':{
             'origins': '*'
         }
     },
     supports_credentials=True
 )
 
-@app.route(f'{BASE_URL}/auth', methods=['POST'])
+
+@app.route(f'{API_BASE_URL}/auth', methods=['POST'])
 def login():
     encoded = request.get_json().get('token')
-    decoded = jwt.decode(
-        f'{encoded}', 
-        key = GOOGLE_OAUTH_PEM,
-        algorithms = SETTINGS.get('google-oauth-algorithms'),
-        audience = [GOOGLE_OAUTH_JSON.get('web').get('client_id')]
-    )
+    print(encoded)
+    decoded = decodeAndValidateJWK(encoded, audience=GOOGLE_OAUTH_AUDIENCE)
     resp = Response(
         json.dumps({
             'name': decoded.get('name'),
@@ -74,7 +73,8 @@ def login():
     )
     return resp
 
-@app.route(f'{BASE_URL}/auth', methods=['DELETE'])
+
+@app.route(f'{API_BASE_URL}/auth', methods=['DELETE'])
 def logout():
     resp = Response(
         json.dumps({
@@ -87,11 +87,10 @@ def logout():
         mimetype='application/json',
         status=204
     )
-    # resp.headers['Authorization'] = None
-    # resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
-@app.route(f'{BASE_URL}/health', methods=['GET'])
+
+@app.route(f'{API_BASE_URL}/health', methods=['GET'])
 def health():
     resp = Response(
         json.dumps({
@@ -114,4 +113,4 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(port=7889, host='0.0.0.0')
+    app.run(port=API_PORT, host='0.0.0.0')

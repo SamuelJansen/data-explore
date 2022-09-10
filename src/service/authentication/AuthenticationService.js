@@ -1,12 +1,14 @@
 import { ContexState } from "../../context-manager/ContextState";
 import { StorageUtil } from "../../util/local-storage/StorageUtil";
 import { STORAGE_KEYS } from "../../util/local-storage/SotrageKeys";
+import { EnvironmnentUtil } from '../../util/environment/EnvironmentUtil'
+import { ENVIRONEMNT_KEYS } from '../../util/environment/EnvironmentKeys'
 import jwtDecode from "jwt-decode";
 
 
 const AUTHORIZATION_HEADER_KEY = `Authorization`
-const SCHEMA = `https`
-const BASE_HOST = `data-explore.com`
+const SCHEMA = EnvironmnentUtil.isLocal() ? `http` : `https`
+const BASE_HOST = EnvironmnentUtil.isLocal() ? `localhost:7889` : `data-explore.com` 
 const SITE_HOST = `${SCHEMA}://studies.${BASE_HOST}`
 const API_HOST = `${SCHEMA}://api.${BASE_HOST}`
 const API_BASE_URL = `${SCHEMA}://api.${BASE_HOST}/authentication-manager-api`
@@ -50,9 +52,11 @@ class AuthenticationService extends ContexState {
     }
 
     doLogin = async () => {
+        console.log(EnvironmnentUtil.isLocal())
+        console.log(EnvironmnentUtil.getCurrentEnvironment())
         try {
             await window.google.accounts.id.initialize({
-                client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+                client_id: EnvironmnentUtil.get(ENVIRONEMNT_KEYS.GOOGLE_AUTHENTICATION_CLIENT_ID),
                 callback: (res) => this._handleLogin(res),
             });
             window.google.accounts.id.prompt((notification) => {
