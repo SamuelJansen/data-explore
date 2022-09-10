@@ -2,7 +2,6 @@ import { ENVIRONEMNT_KEYS, ENVIRONEMNTS } from "./EnvironmentKeys"
 
 
 const getEnv = () => {
-    console.log(process.env)
     return process.env
 }
 
