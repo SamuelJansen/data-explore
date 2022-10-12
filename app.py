@@ -34,7 +34,7 @@ def decodeAndValidateJWK(token, audience=None):
     
     header = jwt.get_unverified_header(token)
     key = jwks_client.get_signing_key(header["kid"]).key
-    redecodedDoken = turn jwt.decode(token, key=key, algorithms=[header["alg"]], audience=audience)
+    redecodedDoken = jwt.decode(token, key=key, algorithms=[header["alg"]], audience=audience)
     log.prettyJson(decodeAndValidateJWK, 'redecodedDoken', redecodedDoken, logLevel=log.DEBUG)
     return redecodedDoken
 
