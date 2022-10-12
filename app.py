@@ -3,7 +3,7 @@ from flask_cors import CORS
 import jwt, base64, json
 import urllib.request
 
-from python_helper import SettingHelper
+from python_helper import SettingHelper, log
 
 
 SETTINGS = SettingHelper.getSettingTree('settings.yml')
@@ -24,11 +24,19 @@ def getJWKsUrl(issuer_url):
 
 def decodeAndValidateJWK(token, audience=None):
     unvalidated = jwt.decode(token, options={"verify_signature": False}, audience=audience)
-    jwks_url = getJWKsUrl(unvalidated['iss'])
-    jwks_client = jwt.PyJWKClient(jwks_url)
+    log.prettyJson(decodeAndValidateJWK, 'unvalidated', unvalidated, logLevel=log.DEBUG)
+
+    jwks_uri = getJWKsUrl(unvalidated['iss'])
+    log.prettyJson(decodeAndValidateJWK, 'jwks_uri', jwks_uri, logLevel=log.DEBUG)
+    
+    jwks_client = jwt.PyJWKClient(jwks_uri)
+    log.prettyJson(decodeAndValidateJWK, 'jwks_client', jwks_client, logLevel=log.DEBUG)
+    
     header = jwt.get_unverified_header(token)
     key = jwks_client.get_signing_key(header["kid"]).key
-    return jwt.decode(token, key=key, algorithms=[header["alg"]], audience=audience)
+    redecodedDoken = turn jwt.decode(token, key=key, algorithms=[header["alg"]], audience=audience)
+    log.prettyJson(decodeAndValidateJWK, 'redecodedDoken', redecodedDoken, logLevel=log.DEBUG)
+    return redecodedDoken
 
 
 app = Flask(__name__)
