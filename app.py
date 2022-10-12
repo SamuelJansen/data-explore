@@ -3,7 +3,7 @@ from flask_cors import CORS
 import jwt, base64, json
 import urllib.request
 
-from python_helper import EnvironmentHelper, SettingHelper, log
+from python_helper import EnvironmentHelper, SettingHelper, ObjectHelper, log
 
 
 EnvironmentHelper.update('DEBUG', True)
@@ -17,7 +17,10 @@ API_BASE_URL = SettingHelper.getSetting('api.server.base-url', SETTINGS)
 API_PORT = SettingHelper.getSetting('api.server.port', SETTINGS)
 GOOGLE_OAUTH_AUDIENCE = [SettingHelper.getSetting('google.oauth.client.id', SETTINGS)]
 ALLOWED_ORIGINS = SettingHelper.getSetting('allowed-origins' , SETTINGS)
-
+JWKS_CLIENT_KEY = 'client'
+JWKS_CLIENT = {
+    JWKS_CLIENT_KEY: None
+}
 
 def getJWKsUrl(issuer_url):
     well_known_url = issuer_url + "/.well-known/openid-configuration"
@@ -29,28 +32,36 @@ def getJWKsUrl(issuer_url):
 
 
 def decodeAndValidateJWK(token, audience=None):
+
     unvalidated = {}
+    decoded = {}
+    
     try:
         unvalidated = jwt.decode(token, options={"verify_signature": False}, audience=audience)
         log.prettyJson(decodeAndValidateJWK, 'unvalidated', unvalidated, logLevel=log.DEBUG)
 
-        jwks_uri = getJWKsUrl(unvalidated['iss'])
-        log.prettyJson(decodeAndValidateJWK, 'jwks_uri', jwks_uri, logLevel=log.DEBUG)
+        if ObjectHelper.isNone(JWKS_CLIENT[JWKS_CLIENT_KEY]):
+            jwks_uri = getJWKsUrl(unvalidated['iss'])
+            log.prettyJson(decodeAndValidateJWK, 'jwks_uri', jwks_uri, logLevel=log.DEBUG)
 
-        jwks_client = jwt.PyJWKClient(jwks_uri)
-        log.prettyJson(decodeAndValidateJWK, 'jwks_client', jwks_client, logLevel=log.DEBUG)
+            JWKS_CLIENT[JWKS_CLIENT_KEY] = jwt.PyJWKClient(jwks_uri)
+            log.prettyJson(decodeAndValidateJWK, 'Created JWKS_CLIENT', JWKS_CLIENT[JWKS_CLIENT_KEY], logLevel=log.DEBUG)
+        else:
+            log.prettyJson(decodeAndValidateJWK, 'Reused JWKS_CLIENT', JWKS_CLIENT[JWKS_CLIENT_KEY], logLevel=log.DEBUG)
         
         header = jwt.get_unverified_header(token)
         log.prettyJson(decodeAndValidateJWK, 'header', header, logLevel=log.DEBUG)
 
-        key = jwks_client.get_signing_key(header["kid"]).key
-        redecodedDoken = jwt.decode(token, key=key, algorithms=[header["alg"]], audience=audience)
-        log.prettyJson(decodeAndValidateJWK, 'redecodedDoken', redecodedDoken, logLevel=log.DEBUG)
+        key = JWKS_CLIENT[JWKS_CLIENT_KEY].get_signing_key(header["kid"]).key
+        decoded = jwt.decode(token, key=key, algorithms=[header["alg"]], audience=audience)
+        log.prettyJson(decodeAndValidateJWK, 'decoded', decoded, logLevel=log.DEBUG)
         
     except Exception as exception:
         log.error(decodeAndValidateJWK, 'not possible to get decoded token', exception=exception)
         log.prettyJson(decodeAndValidateJWK, 'Returning unvalidated token', unvalidated, logLevel=log.WARNING)
-    return unvalidated
+        return unvalidated
+    
+    return decoded
 
 
 app = Flask(__name__)
