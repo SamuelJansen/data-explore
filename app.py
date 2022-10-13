@@ -21,6 +21,7 @@ JWKS_CLIENT_KEY = 'client'
 JWKS_CLIENT = {
     JWKS_CLIENT_KEY: None
 }
+print(ALLOWED_ORIGINS)
 
 def getJWKsUrl(issuer_url):
     well_known_url = issuer_url + "/.well-known/openid-configuration"
@@ -80,17 +81,19 @@ cors = CORS(
 def login():
     encoded = request.get_json().get('token')
     decoded = decodeAndValidateJWK(encoded, audience=GOOGLE_OAUTH_AUDIENCE)
+    responseBody = {
+        'name': decoded.get('name'),
+        'firstName': decoded.get('given_name'),
+        'lastName': decoded.get('family_name'),
+        'email': decoded.get('email'),
+        'picture': decoded.get('picture'),
+        'status': 'SUCCESS'
+    }
     resp = Response(
-        json.dumps({
-            'name': decoded.get('name'),
-            'firstName': decoded.get('given_name'),
-            'lastName': decoded.get('family_name'),
-            'email': decoded.get('email'),
-            'picture': decoded.get('picture'),
-            'status': 'SUCCESS'
-        }),
+        json.dumps(responseBody),
         headers={
             'Authorization': f'Bearer {encoded}', 
+            'Third-Part-Authorization': f'Bearer {encoded}',
             'my-header': 'some-value', 
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Headers': '*',
@@ -102,6 +105,7 @@ def login():
         mimetype='application/json', 
         status=201
     )
+    log.prettyJson(login, 'responseBody', responseBody, logLevel=log.STATUS)
     return resp
 
 
