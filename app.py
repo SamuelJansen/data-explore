@@ -69,8 +69,8 @@ cors = CORS(
     app,
     resources={
         f'{API_BASE_URL}/*':{
-            # 'origins': ALLOWED_ORIGINS
-            'origins': '*'
+            'origins': ALLOWED_ORIGINS
+            # 'origins': '*'
         }
     },
     supports_credentials=True
