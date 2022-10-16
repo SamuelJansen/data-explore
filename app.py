@@ -21,7 +21,6 @@ JWKS_CLIENT_KEY = 'client'
 JWKS_CLIENT = {
     JWKS_CLIENT_KEY: None
 }
-print(ALLOWED_ORIGINS)
 
 def getJWKsUrl(issuer_url):
     well_known_url = issuer_url + "/.well-known/openid-configuration"
@@ -70,7 +69,7 @@ cors = CORS(
     app,
     resources={
         f'{API_BASE_URL}/*':{
-            'origins': '*'
+            'origins': ALLOWED_ORIGINS
         }
     },
     supports_credentials=True
