@@ -21,12 +21,14 @@ JWKS_CLIENT_KEY = 'client'
 JWKS_CLIENT = {
     JWKS_CLIENT_KEY: None
 }
+ACTIVE_ENVIRONMENT = SettingHelper.getSetting('active-environment', SETTINGS)
 USER_ACCOUNTS = SettingHelper.getSetting('accounts.users', SETTINGS)
 ROLES = SettingHelper.getSetting('accounts.roles', SETTINGS)
 SECRET_KEY = SettingHelper.getSetting('security.secret-key.active-environment', SETTINGS)
-print(USER_ACCOUNTS)
-print(ROLES)
-print(SECRET_KEY)
+if 'local' == ACTIVE_ENVIRONMENT:
+    print(USER_ACCOUNTS)
+    print(ROLES)
+    print(SECRET_KEY)
 
 def unsafellyDecode(token, audience=None):
     return jwt.decode(token, options={'verify_signature': False}, audience=audience)
