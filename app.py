@@ -44,35 +44,28 @@ def getJWKsUrl(issuer_url):
 
 
 def decodeAndValidateJWK(token, audience=None):
-
     unvalidated = {}
     decoded = {}
-
     try:
         unvalidated = unsafellyDecode(token, audience=audience)
         log.prettyJson(decodeAndValidateJWK, 'unvalidated', unvalidated, logLevel=log.DEBUG)
-
         if ObjectHelper.isNone(JWKS_CLIENT[JWKS_CLIENT_KEY]):
             jwks_uri = getJWKsUrl(unvalidated['iss'])
             log.prettyJson(decodeAndValidateJWK, 'jwks_uri', jwks_uri, logLevel=log.DEBUG)
-
             JWKS_CLIENT[JWKS_CLIENT_KEY] = jwt.PyJWKClient(jwks_uri)
             log.prettyJson(decodeAndValidateJWK, 'Created JWKS_CLIENT', JWKS_CLIENT[JWKS_CLIENT_KEY], logLevel=log.DEBUG)
         else:
             log.prettyJson(decodeAndValidateJWK, 'Reused JWKS_CLIENT', JWKS_CLIENT[JWKS_CLIENT_KEY], logLevel=log.DEBUG)
-
         header = jwt.get_unverified_header(token)
         log.prettyJson(decodeAndValidateJWK, 'header', header, logLevel=log.DEBUG)
-
         key = JWKS_CLIENT[JWKS_CLIENT_KEY].get_signing_key(header['kid']).key
+        log.prettyJson(decodeAndValidateJWK, 'key', key, logLevel=log.DEBUG)
         decoded = jwt.decode(token, key=key, algorithms=[header['alg']], audience=audience)
         log.prettyJson(decodeAndValidateJWK, 'decoded', decoded, logLevel=log.DEBUG)
-
     except Exception as exception:
-        log.error(decodeAndValidateJWK, 'not possible to get decoded token', exception=exception)
+        log.error(decodeAndValidateJWK, 'Not possible to get decoded token', exception=exception)
         log.prettyJson(decodeAndValidateJWK, 'Returning unvalidated token', unvalidated, logLevel=log.WARNING)
         return unvalidated
-
     return decoded
 
 
@@ -136,7 +129,7 @@ cors = CORS(
 
 @app.route(f'{API_BASE_URL}/auth', methods=['POST'])
 def login():
-    # encoded = request.get_json().get('token')
+    log.prettyJson(login, 'requestHeader', dict(request.headers), logLevel=log.INFO)
     encoded = dict(request.headers).get('Authorization', 'Bearer token').split()[-1]
     thirdPartAuthenticationToken = decodeAndValidateJWK(encoded, audience=GOOGLE_OAUTH_AUDIENCE)
     authenticationToken = createAuthentication(thirdPartAuthenticationToken)
@@ -172,7 +165,7 @@ def logout():
 def health():
     resp = Response(
         json.dumps({
-            'status': 'SUCCESS'
+            'status': 'UP'
         }),
         headers = buildHeaders(),
         mimetype = 'application/json',
